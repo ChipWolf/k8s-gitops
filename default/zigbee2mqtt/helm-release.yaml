@@ -1,0 +1,39 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: zigbee2mqtt
+  namespace: default
+spec:
+  releaseName: zigbee2mqtt
+  rollback:
+    enable: false
+  chart:
+    repository: https://k8s-at-home.com/charts/
+    name: zigbee2mqtt
+    version: 2.1.0
+  values:
+    timezone: "Europe/London"
+    config:
+      advanced:
+        network_key: [145,235,210,198,146,195,194,39,12,155,186,121,172,47,171,254]
+      homeassistant: true
+      mqtt:
+        server: mqtt://vernemq
+        disable_led: true
+      devices:
+        '0x00158d000533c498':
+          friendly_name: Nursery Environment
+        '0x680ae2fffef91e07':
+          friendly_name: En Suite Motion
+    persistence:
+      enabled: true
+      storageClass: "local-path"
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+      hosts: [zigbee2mqtt.starbs.net]
+      tls:
+      - hosts:
+        - zigbee2mqtt.starbs.net

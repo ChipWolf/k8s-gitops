@@ -1,0 +1,239 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+  annotations:
+    fluxcd.io/ignore: "false"
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.grafana: semver:~7
+spec:
+  releaseName: kube-prometheus-stack
+  forceUpgrade: true
+  rollback:
+    enable: true
+  chart:
+    repository: https://prometheus-community.github.io/helm-charts
+    name: kube-prometheus-stack
+    version: 9.4.10
+  valuesFrom:
+    - secretKeyRef:
+        name: kube-prometheus-helm-values
+  values:
+    server:
+      resources:
+        requests:
+          memory: 1500Mi
+          cpu: 25m
+        limits:
+          memory: 2000Mi
+    prometheusOperator:
+      createCustomResource: true
+    alertmanager:
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              resources:
+                requests:
+                  storage: 2Gi
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+        hosts: [prom-alert.starbs.net]
+        tls:
+        - hosts:
+          - prom-alert.starbs.net
+      config:
+        route:
+          receiver: 'slack-notifications'
+          routes:
+            - match:
+                alertname: Watchdog
+              receiver: 'null'
+            - receiver: 'slack-notifications'
+        inhibit_rules:
+        - source_match:
+            severity: 'critical'
+          target_match:
+            severity: 'warning'
+          # Apply inhibition if the alertname is the same.
+          equal: ['alertname', 'namespace']
+        templates: ["*.tmpl"]
+    nodeExporter:
+      serviceMonitor:
+        relabelings:
+        - action: replace
+          regex: (.*)
+          replacement: $1
+          sourceLabels:
+          - __meta_kubernetes_pod_node_name
+          targetLabel: kubernetes_node
+    kubelet:
+      serviceMonitor:
+        metricRelabelings:
+        - action: replace
+          sourceLabels:
+          - node
+          targetLabel: instance
+    grafana:
+      deploymentStrategy:
+        type: Recreate
+      persistence:
+        enabled: true
+        storageClassName: "local-path"
+        size: 2Gi
+        accessModes:
+        - ReadWriteOnce
+      env:
+        GF_EXPLORE_ENABLED: true
+        GF_DISABLE_SANITIZE_HTML: true
+        GF_PANELS_DISABLE_SANITIZE_HTML: true
+        VAR_BLOCKY_URL: "http://blocky.default.svc.cluster.local:4000"
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+        hosts: [grafana.starbs.net]
+        tls:
+        - hosts:
+          - grafana.starbs.net
+      plugins:
+      - natel-discrete-panel
+      - pr0ps-trackmap-panel
+      - grafana-piechart-panel
+      - https://github.com/panodata/grafana-map-panel/releases/download/0.9.0/grafana-map-panel-0.9.0.zip;grafana-worldmap-panel-ng
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+          - name: 'default'
+            orgId: 1
+            folder: ''
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+      dashboards:
+        default:
+          nginx-dashboard:
+            url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
+            datasource: Prometheus
+          vernemq:
+            url: https://raw.githubusercontent.com/vernemq/vernemq/master/metrics_scripts/grafana/VerneMQ%20Node%20Metrics.json
+            datasource: Prometheus
+          blocky:
+            url: https://raw.githubusercontent.com/0xERR0R/blocky/master/docs/blocky-grafana.json
+            datasource: Prometheus
+          uptimerobot:
+            url: https://raw.githubusercontent.com/lekpamartin/uptimerobot_exporter/master/dashboards/grafana.json
+            datasource: Prometheus
+          1-node-exporter:
+            url: https://grafana.com/api/dashboards/11074/revisions/4/download
+            datasource: Prometheus
+          internet-speed:
+            url: https://raw.githubusercontent.com/ChipWolf/k8s-gitops/master/monitoring/kube-prometheus-stack/grafana-dashboards/internet_speed.json
+            datasource: speedtests
+          home-assistant:
+            url: https://raw.githubusercontent.com/ChipWolf/k8s-gitops/master/monitoring/kube-prometheus-stack/grafana-dashboards/home_assistant.json
+            datasource: home_assistant
+      sidecar:
+        datasources:
+          enabled: true
+          defaultDatasourceEnabled: false
+        dashboards:
+          enabled: true
+          searchNamespace: ALL
+      additionalDataSources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://thanos-query-http:10902/
+        isDefault: true
+      - name: loki
+        type: loki
+        access: proxy
+        url: http://loki.logs.svc.cluster.local:3100
+      #- name: influxdb
+      #  type: influxdb
+      #  access: proxy
+      #  url: http://influxdb:8086
+      #  database: telegraf
+      - name: home_assistant
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: home_assistant
+      - name: speedtests
+        type: influxdb
+        access: proxy
+        url: http://influxdb:8086
+        database: speedtests
+      grafana.ini:
+        server:
+          root_url: https://grafana.starbs.net
+        auth.anonymous:
+          enabled: true
+          org_role: Admin # Viewer
+        paths:
+          data: /var/lib/grafana/data
+          logs: /var/log/grafana
+          plugins: /var/lib/grafana/plugins
+          provisioning: /etc/grafana/provisioning
+        analytics:
+          check_for_updates: true
+        log:
+          mode: console
+        grafana_net:
+          url: https://grafana.net
+    kubeEtcd:
+      enabled: false
+    kubeControllerManager:
+      enabled: true
+      endpoints:
+      - 10.2.0.30
+    kubeScheduler:
+      enabled: true
+      endpoints:
+      - 10.2.0.30
+    kubeProxy:
+      enabled: false
+    prometheus:
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+        hosts: [prom-server.starbs.net]
+        tls:
+        - hosts:
+          - prom-server.starbs.net
+      prometheusSpec:
+        replicas: 2
+        replicaExternalLabelName: "replica"
+        ruleSelector: {}
+        ruleNamespaceSelector: {}
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelector: {}
+        podMonitorNamespaceSelector: {}
+        podMonitorSelectorNilUsesHelmValues: false
+        retention: 6h
+        enableAdminAPI: true
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              resources:
+                requests:
+                  storage: 2Gi
+        thanos:
+          version: v0.15.0
+          objectStorageConfig:
+            name: thanos
+            key: object-store.yaml
