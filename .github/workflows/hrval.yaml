@@ -1,4 +1,5 @@
-name: CI
+---
+name: validation
 
 on: [push, pull_request]
 

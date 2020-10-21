@@ -1,10 +1,10 @@
-# GitOps workflow for kubernetes cluster
+# Kubenetes GitOps @ Home
 
-![](https://i.imgur.com/LJn8Own.png)
+![gitops-1](https://i.imgur.com/LJn8Own.png)
 
-![](https://i.imgur.com/9tvyWMp.png)
+![gitops-2](https://i.imgur.com/9tvyWMp.png)
 
-Leverage [Flux](https://github.com/fluxcd/flux) to automate cluster state using code residing in this repo
+Leverages [Flux](https://github.com/fluxcd/flux) to automate cluster state using code residing in this repo
 
 ## Setup
 
