@@ -1,0 +1,27 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: flux
+  namespace: flux
+  annotations:
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.chart-image: semver:~1.14
+spec:
+  releaseName: flux
+  helmVersion: v3
+  chart:
+    repository: https://charts.fluxcd.io/
+    name: flux
+    version: 1.5.0
+  valuesFrom:
+  - externalSourceRef:
+      url: https://raw.githubusercontent.com/chipwolf/k8s-gitops/master/flux/flux/values.yaml
+  values:
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        create: true
+        interval: 30s
+        scrapeTimeout: 10s
+        namespace: flux

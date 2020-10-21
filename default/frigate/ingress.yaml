@@ -1,0 +1,23 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+  labels:
+    app.kubernetes.io/instance: frigate
+    app.kubernetes.io/name: frigate
+  name: frigate-noauth
+spec:
+  rules:
+  - host: frigate.starbs.net
+    http:
+      paths:
+      - backend:
+          serviceName: frigate
+          servicePort: http
+        path: /.*/best\.jpg
+  tls:
+  - hosts:
+    - frigate.starbs.net
