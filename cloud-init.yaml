@@ -1,0 +1,23 @@
+#cloud-config
+init_cmd:
+- |
+  /usr/bin/sed -i -E 's/PasswordAuthentication( +)no/PasswordAuthentication\1yes/g' /etc/ssh/sshd_config
+run_cmd:
+- |
+  bash -c 'for i in {12..27}; do /usr/sbin/ip addr add 172.16.1.1$i/28 dev eth0; done'
+k3os:
+#  k3s_args:
+#  - server
+#  - "--no-deploy"
+#  - "traefik,coredns,local-storage,servicelb"
+  password: rancher
+write_files:
+- encoding: ""
+  content: |-
+    [service_wolf]
+    Type = ethernet
+    IPv4 = 172.16.1.90/255.255.255.0/172.16.1.1
+    Nameservers = 172.16.1.23
+  owner: root
+  path: /var/lib/connman/wolf_eth.config
+  permissions: '0755'
