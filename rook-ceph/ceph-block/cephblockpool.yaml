@@ -1,3 +1,4 @@
+---
 apiVersion: ceph.rook.io/v1
 kind: CephBlockPool
 metadata:
@@ -6,4 +7,5 @@ metadata:
 spec:
   failureDomain: host
   replicated:
+    requireSafeReplicaSize: true
     size: 3

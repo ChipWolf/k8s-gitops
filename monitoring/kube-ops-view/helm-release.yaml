@@ -1,0 +1,23 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: kube-ops-view
+  namespace: monitoring
+spec:
+  chart:
+    name: kube-ops-view
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    version: 1.2.1
+  releaseName: kube-ops-view
+  values:
+    ingress:
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      enabled: true
+      hostname: ops.starbs.net
+      tls:
+        - hosts:
+            - minio.starbs.net
+    rbac:
+      create: true

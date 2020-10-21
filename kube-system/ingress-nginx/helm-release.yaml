@@ -1,0 +1,59 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  annotations:
+    fluxcd.io/automated: "false"
+    fluxcd.io/ignore: "false"
+    fluxcd.io/tag.chart-image: "semver:~0."
+  name: ingress-nginx
+  namespace: kube-system
+spec:
+  chart:
+    name: ingress-nginx
+    repository: "https://kubernetes.github.io/ingress-nginx"
+    version: 3.4.1
+  helmVersion: v3
+  releaseName: ingress-nginx
+  rollback:
+    enable: true
+  values:
+    controller:
+      admissionWebhooks:
+        enabled: false
+      config:
+        custom-http-errors: "404,401,403,500,503"
+      extraArgs:
+        default-ssl-certificate: kube-system/acme-crt-secret
+      metrics:
+        enabled: true
+        prometheusRule:
+          enabled: false
+        serviceMonitor:
+          enabled: true
+          namespace: kube-system
+      replicaCount: 2
+      resources:
+        limits:
+          memory: 600Mi
+        requests:
+          cpu: 25m
+          memory: 500Mi
+      service:
+        externalTrafficPolicy: Local
+        loadBalancerIP: 172.16.1.119
+      tolerations:
+        - key: "arm"
+          operator: "Exists"
+      use-forwarded-headers: "true"
+    defaultBackend:
+      enabled: true
+      image:
+        repository: billimek/custom-error-pages
+        tag: 0.4.4
+      resources:
+        limits:
+          memory: 350Mi
+        requests:
+          cpu: 25m
+          memory: 250Mi

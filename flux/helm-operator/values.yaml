@@ -1,0 +1,17 @@
+---
+chartsSyncInterval: 10m
+createCRD: false
+dashboards:
+  enabled: true
+git:
+  ssh:
+    secretName: flux-git-deploy
+helm:
+  versions: v3
+image:
+  repository: docker.io/raspbernetes/helm-operator
+  tag: ba9ac2d3d2fe12a628b23bea3dcc9eccccf02fa5
+statusUpdateInterval: 10m
+tolerations:
+  - key: "arm"
+    operator: "Exists"

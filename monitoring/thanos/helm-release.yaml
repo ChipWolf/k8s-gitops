@@ -1,0 +1,58 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  annotations:
+    fluxcd.io/automated: "false"
+    fluxcd.io/ignore: "false"
+    fluxcd.io/tag.chart-image: 'regexp:^(1\.[0-9]+\.[0-9]+)$'
+  name: thanos
+  namespace: monitoring
+spec:
+  chart:
+    name: thanos
+    repository: "https://kubernetes-charts.banzaicloud.com"
+    version: 0.3.28
+  releaseName: thanos
+  rollback:
+    enable: true
+  values:
+    compact:
+      retentionResolution1h: 5y
+    image:
+      repository: quay.io/thanos/thanos
+      tag: v0.15.0
+    objstore:
+      config:
+        bucket: thanos
+        endpoint: "minio.default.svc:9000"
+        http_config:
+          idle_conn_timeout: 0s
+          insecure_skip_verify: false
+          response_header_timeout: 0s
+        insecure: true
+        part_size: 0
+        put_user_metadata: {}
+        region: ""
+        signature_version2: false
+        trace:
+          enable: false
+      type: S3
+    query:
+      http:
+        ingress:
+          annotations:
+            kubernetes.io/ingress.class: nginx
+            nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16"
+          enabled: true
+          hosts:
+            - thanos.starbs.net
+          tls:
+            - hosts:
+                - thanos.starbs.net
+      replicaCount: 2
+      replicaLabels:
+        - replica
+  valuesFrom:
+    - secretKeyRef:
+        name: thanos-helm-values

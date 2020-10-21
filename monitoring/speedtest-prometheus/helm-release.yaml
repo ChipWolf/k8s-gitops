@@ -1,0 +1,21 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: speedtest-prometheus
+  namespace: monitoring
+spec:
+  chart:
+    name: speedtest-prometheus
+    repository: "https://k8s-at-home.com/charts/"
+    version: 2.0.0
+  releaseName: speedtest-prometheus
+  rollback:
+    enable: true
+  values:
+    serviceMonitor:
+      enabled: true
+      interval: 60m
+    tolerations:
+      - key: "arm"
+        operator: "Exists"

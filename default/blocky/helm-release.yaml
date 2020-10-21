@@ -1,0 +1,113 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  annotations:
+    fluxcd.io/automated: "false"
+    fluxcd.io/ignore: "false"
+    fluxcd.io/tag.chart-image: 'regexp:^v([0-9]+\.[0-9]+)$'
+  name: blocky
+  namespace: default
+spec:
+  chart:
+    name: blocky
+    repository: "https://k8s-at-home.com/charts/"
+    version: 4.0.1
+  helmVersion: v3
+  releaseName: blocky
+  resetValues: true
+  rollback:
+    enable: true
+  values:
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - blocky
+            topologyKey: kubernetes.io/hostname
+    config:
+      blocking:
+        blackLists:
+          ads:
+            - "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+            - "https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt"
+            - "https://mirror1.malwaredomains.com/files/justdomains"
+            - "http://sysctl.org/cameleon/hosts"
+            - "https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist"
+            - "https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt"
+          kids:
+            - "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts"
+        clientGroupsBlock:
+          "*nsley*":
+            - ads
+            - kids
+          "*rinley*":
+            - ads
+            - kids
+          10.0.2.1/24:
+            - ads
+          default:
+            - ads
+        whiteLists:
+          ads:
+            - "https://raw.githubusercontent.com/chadmayfield/my-pihole-blocklists/master/white.list"
+      clientLookup:
+        upstream: "tcp+udp:172.16.1.23"
+      conditional:
+        mapping:
+          lan: "tcp+udp:172.16.1.23"
+          local: "tcp+udp:172.16.1.118"
+          starbs.net: "tcp+udp:172.16.1.118"
+      httpPort: 4000
+      logLevel: info
+      prometheus:
+        enable: true
+        path: /metrics
+      upstream:
+        externalResolvers:
+          - "tcp+udp:172.16.1.23"
+    image:
+      repository: spx01/blocky
+      tag: v0.10
+    probes:
+      liveness:
+        failureThreshold: 5
+        periodSeconds: 10
+      readiness:
+        failureThreshold: 5
+        periodSeconds: 10
+      startup:
+        failureThreshold: 30
+        initialDelaySeconds: 5
+        periodSeconds: 10
+    replicas: 1
+    resources:
+      limits:
+        memory: 1000Mi
+      requests:
+        cpu: 50m
+        memory: 280Mi
+    serviceMonitor:
+      enabled: true
+    serviceTCP:
+      annotations:
+        metallb.universe.tf/allow-shared-ip: blocky
+      enabled: true
+      externalTrafficPolicy: Local
+      loadBalancerIP: 172.16.1.113
+      type: LoadBalancer
+    serviceUDP:
+      annotations:
+        metallb.universe.tf/allow-shared-ip: blocky
+      enabled: true
+      externalTrafficPolicy: Local
+      loadBalancerIP: 172.16.1.113
+      type: LoadBalancer
+    timeZone: Europe/London
+    tolerations:
+      - key: "arm"
+        operator: "Exists"

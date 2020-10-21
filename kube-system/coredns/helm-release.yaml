@@ -1,0 +1,63 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  annotations:
+    fluxcd.io/automated: "false"
+    fluxcd.io/ignore: "false"
+  name: coredns
+  namespace: kube-system
+spec:
+  chart:
+    name: coredns
+    repository: "https://kubernetes-charts.storage.googleapis.com/"
+    version: 1.13.4
+  helmVersion: v3
+  releaseName: coredns
+  rollback:
+    enable: false
+  values:
+    isClusterService: false
+    prometheus:
+      monitor:
+        enabled: true
+      service:
+        enabled: true
+    rbac:
+      create: true
+    replicaCount: 2
+    servers:
+      - plugins:
+          - name: errors
+          - configBlock: lameduck 5s
+            name: health
+          - name: ready
+          - name: prometheus
+            parameters: "0.0.0.0:9153"
+          - name: forward
+            parameters: . /etc/resolv.conf
+          - name: cache
+            parameters: 30
+          - name: loop
+          - name: reload
+          - name: loadbalance
+          - name: file
+            parameters: /etc/coredns/starbs.net
+        port: 53
+        zones:
+          - scheme: "dns://"
+            use_tcp: false
+            zone: starbs.net.
+    service:
+      annotations:
+        metallb.universe.tf/allow-shared-ip: coredns
+      externalTrafficPolicy: Local
+      loadBalancerIP: 172.16.1.118
+    serviceType: LoadBalancer
+    zoneFiles:
+      - contents: |
+          starbs.net.   IN SOA ns-235.awsdns-29.com. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400
+          *.starbs.net. IN A   172.16.1.119
+          starbs.net. IN A   172.16.1.90
+        domain: starbs.net
+        filename: starbs.net

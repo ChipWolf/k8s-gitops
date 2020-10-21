@@ -1,0 +1,117 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: zigbee2mqtt
+  namespace: default
+spec:
+  chart:
+    name: zigbee2mqtt
+    repository: "https://k8s-at-home.com/charts/"
+    version: 4.1.2
+  releaseName: zigbee2mqtt
+  rollback:
+    enable: false
+  values:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - k3s-pi4-a
+    config:
+      advanced:
+        log_level: debug
+        network_key:
+          - 146
+          - 236
+          - 211
+          - 199
+          - 147
+          - 196
+          - 195
+          - 40
+          - 13
+          - 156
+          - 187
+          - 122
+          - 173
+          - 48
+          - 172
+          - 254
+      devices:
+        "0x00158d000533c498":
+          friendly_name: Nursery Environment
+          retain: true
+        "0x680ae2fffef91e07":
+          friendly_name: En Suite Motion
+          retain: true
+        "0xccccccfffe9dcaf9":
+          friendly_name: Bedroom Lamp
+          retain: true
+        "0xccccccfffea9121b":
+          friendly_name: En Suite Spot Left
+          retain: true
+        "0xccccccfffeb7e9f9":
+          friendly_name: En Suite Rail Center
+          retain: true
+        "0xccccccfffeb8bf1a":
+          friendly_name: En Suite Rail Near
+          retain: true
+        "0xccccccfffebac0e8":
+          friendly_name: Kitchen Rail Near Outer
+          retain: true
+        "0xccccccfffee4f36c":
+          friendly_name: En Suite Spot Right
+          retain: true
+        "0xccccccfffee4f302":
+          friendly_name: Kitchen Rail Far Outer
+          retain: true
+        "0xec1bbdfffe2de199":
+          friendly_name: Kitchen Rail Far Inner
+          retain: true
+        "0xec1bbdfffe2f4999":
+          friendly_name: En Suite Rail Far
+          retain: true
+        "0xec1bbdfffe8c83e7":
+          friendly_name: Kitchen Remote
+          retain: true
+        "0xec1bbdfffe9eb6b1":
+          friendly_name: Bedroom Remote
+          retain: true
+        "0xec1bbdfffe87fcd9":
+          friendly_name: En Suite Remote
+          retain: true
+        "0xec1bbdfffe432007":
+          friendly_name: Kitchen Rail Near Inner
+          retain: true
+      homeassistant: true
+      mqtt:
+        server: "mqtt://vernemq"
+    ingress:
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      enabled: true
+      hosts:
+        - host: zigbee2mqtt.starbs.net
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - zigbee2mqtt.starbs.net
+    persistence:
+      data:
+        accessMode: ReadWriteOnce
+        enabled: true
+        existingClaim: data-zigbee2mqtt-0
+        size: 100Mi
+        skipuninstall: true
+        storageClass: local-path
+    timezone: Europe/London
+    tolerations:
+      - key: arm
+        operator: Exists

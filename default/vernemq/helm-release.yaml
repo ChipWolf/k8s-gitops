@@ -1,0 +1,40 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  annotations:
+    fluxcd.io/automated: "false"
+    fluxcd.io/tag.chart-image: "semver:0"
+  name: vernemq
+  namespace: default
+spec:
+  chart:
+    name: vernemq
+    repository: "https://vernemq.github.io/docker-vernemq"
+    version: 1.6.6
+  helmVersion: v3
+  releaseName: vernemq
+  rollback:
+    enable: false
+  values:
+    additionalEnv:
+      - name: DOCKER_VERNEMQ_ACCEPT_EULA
+        value: "yes"
+      - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
+        value: "on"
+    image:
+      repository: vernemq/vernemq
+      tag: 1.11.0-alpine
+    podAntiAffinity: hard
+    replicaCount: 1
+    service:
+      loadBalancerIP: 172.16.1.117
+      type: LoadBalancer
+      ws:
+        enabled: true
+    serviceMonitor:
+      create: true
+    statefulset:
+      podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scrape: "true"

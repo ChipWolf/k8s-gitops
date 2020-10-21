@@ -1,1 +1,0 @@
-rtspPassword: "$RTSP_PASSWORD"

@@ -1,0 +1,25 @@
+---
+additionalArgs:
+  - "--connect=ws://fluxcloud"
+dashboards:
+  enabled: true
+git:
+  url: "git@github.com:chipwolf/k8s-gitops"
+helmOperator:
+  create: false
+image:
+  repository: docker.io/raspbernetes/flux
+  tag: latest
+memcached:
+  tolerations:
+    - key: "arm"
+      operator: "Exists"
+registry:
+  burst: 50
+  rps: 50
+syncGarbageCollection:
+  dry: false
+  enabled: true
+tolerations:
+  - key: "arm"
+    operator: "Exists"
