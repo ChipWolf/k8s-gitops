@@ -1,0 +1,45 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: sonarr
+  namespace: default
+  annotations:
+    fluxcd.io/automated: "true"
+    fluxcd.io/tag.chart-image: semver:3.0
+spec:
+  releaseName: sonarr
+  helmVersion: v3
+  rollback:
+    enable: true
+  chart:
+    repository: https://k8s-at-home.com/charts/
+    name: sonarr
+    version: 5.0.0
+  values:
+    image:
+      repository: linuxserver/sonarr
+      tag: 3.0.3.911-ls39
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+      hosts: [sonarr.starbs.net]
+      tls:
+      - hosts:
+        - sonarr.starbs.net
+    timezone: "Europe/London"
+    persistence:
+      config:
+        enabled: true
+        storageClass: "local-path"
+        size: 2Gi
+      media:
+        enabled: true
+        existingClaim: data
+    resources:
+      requests:
+        memory: 350Mi
+        cpu: 25m
+      limits:
+        memory: 500Mi
