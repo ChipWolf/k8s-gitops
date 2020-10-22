@@ -34,10 +34,10 @@ spec:
         - https://cloudflare-dns.com/dns-query
       conditional:
         mapping:
-          local: tcp+udp:10.0.7.1
+          lan: tcp+udp:172.16.1.23
           status.starbs.net: tcp+udp:1.1.1.1
           cloud.starbs.net: tcp+udp:8.8.8.8
-          starbs.net: tcp+udp:10.0.6.99
+          starbs.net: tcp+udp:172.16.1.118
       blocking:
         blackLists:
           ads:

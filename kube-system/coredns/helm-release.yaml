@@ -31,7 +31,7 @@ spec:
     - zones:
       - zone: starbs.net.
         scheme: dns://
-        use_tcp: true
+        use_tcp: false # TODO: true kubernetes/kubernetes#23880
       port: 53
       plugins:
       - name: errors
@@ -56,7 +56,7 @@ spec:
        contents: |
          starbs.net.   IN SOA ns-235.awsdns-29.com. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400
          *.starbs.net. IN A   172.16.1.119
-         starbs.net. IN A   172.16.1.202
+         starbs.net. IN A   172.16.1.207
     prometheus:
       service:
         enabled: true

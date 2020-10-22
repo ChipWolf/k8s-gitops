@@ -1,5 +1,5 @@
 ---
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt-prod
@@ -16,7 +16,7 @@ spec:
         providers:
         - name: route53-dns
           route53:
-            accessKeyID: AKIAW4YYMLNFPKMOL6GO # TODO: replace with our access key
+            accessKeyID: AKIAXSZNSZEEN37KIWEB
             region: us-east-1
             secretAccessKeySecretRef:
               name: route53-credentials
