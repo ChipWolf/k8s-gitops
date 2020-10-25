@@ -18,12 +18,12 @@ spec:
     name: plex
     version: 2.0.3
   valuesFrom:
-    - secretKeyRef:
-        name: plex-helm-values
+  - secretKeyRef:
+      name: plex-helm-values
   values:
     image:
       repository: plexinc/pms-docker
-      tag: 1.20.3.3437-f1f08d65b
+      tag: 1.20.3.3483-211702a9f
     ingress:
       enabled: true
       annotations:
