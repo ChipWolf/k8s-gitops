@@ -22,7 +22,7 @@ spec:
     flows: flows.json
     image:
       repository: nodered/node-red
-      tag: 1.2.6-12-minimal
+      tag: 1.2.7-12-minimal
     ingress:
       annotations:
         kubernetes.io/ingress.class: nginx
