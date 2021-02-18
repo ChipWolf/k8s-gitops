@@ -13,7 +13,7 @@ spec:
   chart:
     name: home-assistant
     repository: "https://k8s-at-home.com/charts/"
-    version: 5.1.1
+    version: 6.0.1
   releaseName: home-assistant
   rollback:
     enable: true
@@ -23,19 +23,19 @@ spec:
     hostNetwork: true
     image:
       repository: homeassistant/home-assistant
-      tag: 2021.1.4
+      tag: 2021.2.0
     ingress:
       annotations:
         kubernetes.io/ingress.class: nginx
       enabled: true
       hosts:
-      - host: hass.starbs.net
-        paths:
-        - path: /
-          pathType: Prefix
+        - host: hass.starbs.net
+          paths:
+            - path: /
+              pathType: Prefix
       tls:
-      - hosts:
-        - hass.starbs.net
+        - hosts:
+            - hass.starbs.net
     monitoring:
       enabled: false
     persistence:
@@ -67,8 +67,8 @@ spec:
       loadBalancerIP: 172.16.1.114
       type: LoadBalancer
     tolerations:
-    - key: "arm"
-      operator: "Exists"
+      - key: "arm"
+        operator: "Exists"
     addons:
       codeserver:
         enabled: true
@@ -77,22 +77,22 @@ spec:
           tag: 3.8.0
         workingDir: "/config"
         args:
-        - --user-data-dir
-        - "/config/.vscode"
-        - --auth
-        - "none"
+          - --user-data-dir
+          - "/config/.vscode"
+          - --auth
+          - "none"
       ingress:
         annotations:
           kubernetes.io/ingress.class: nginx
         enabled: true
         hosts:
-        - host: hass-vscode.starbs.net
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: hass-vscode.starbs.net
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
-        - hosts:
-          - hass-vscode.starbs.net
+          - hosts:
+              - hass-vscode.starbs.net
       volumeMounts:
-      - name: config
-        mountPath: /config
+        - name: config
+          mountPath: /config
