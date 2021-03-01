@@ -1,0 +1,4 @@
+www.reddit.com
+discourse.pi-hole.net
+files.slack.com
+slack.com

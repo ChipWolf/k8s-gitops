@@ -1,17 +1,21 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: zigbee2mqtt
   namespace: default
 spec:
+  interval: 5m
   chart:
-    name: zigbee2mqtt
-    repository: "https://k8s-at-home.com/charts/"
-    version: 4.1.2
-  releaseName: zigbee2mqtt
-  rollback:
-    enable: false
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: zigbee2mqtt
+      version: 6.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
   values:
     affinity:
       nodeAffinity:
@@ -21,7 +25,7 @@ spec:
                 - key: kubernetes.io/hostname
                   operator: In
                   values:
-                    - k3s-pi4-a
+                    - ubuntu
     config:
       advanced:
         log_level: debug
@@ -107,10 +111,10 @@ spec:
       data:
         accessMode: ReadWriteOnce
         enabled: true
-        existingClaim: data-zigbee2mqtt-0
+        #existingClaim: data-zigbee2mqtt-0
         size: 100Mi
         skipuninstall: true
-        storageClass: local-path
+        storageClass: openebs-hostpath
     timezone: Europe/London
     tolerations:
       - key: arm

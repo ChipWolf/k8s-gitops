@@ -8,6 +8,7 @@ need() {
 
 need "kubectl"
 need "helm"
+need "flux"
 
 message() {
   echo -e "\n######################################################################"
@@ -16,30 +17,34 @@ message() {
 }
 
 installFlux() {
-  message "installing flux"
-  # install flux
-  helm repo add fluxcd https://charts.fluxcd.io
-  helm repo update
-  kubectl create namespace flux
-  helm upgrade --install flux --values "$REPO_ROOT"/flux/flux/values.yaml --namespace flux fluxcd/flux
-  helm upgrade --install helm-operator --values "$REPO_ROOT"/flux/helm-operator/values.yaml --namespace flux fluxcd/helm-operator
+  message "installing fluxv2"
+  flux check --pre > /dev/null
+  FLUX_PRE=$?
+  if [ $FLUX_PRE != 0 ]; then 
+    echo -e "flux prereqs not met:\n"
+    flux check --pre
+    exit 1
+  fi
+  if [ -z "$GITHUB_TOKEN" ]; then
+    echo "GITHUB_TOKEN is not set! Check $REPO_ROOT/setup/.env"
+    exit 1
+  fi
+  flux bootstrap github \
+    --owner=chipwolf \
+    --repository=k8s-gitops \
+    --branch master \
+    --personal
 
-  FLUX_READY=1
-  while [ $FLUX_READY != 0 ]; do
-    echo "waiting for flux pod to be fully ready..."
-    kubectl -n flux wait --for condition=available deployment/flux
-    FLUX_READY="$?"
-    sleep 5
-  done
-
-  # grab output the key
-  FLUX_KEY=$(kubectl -n flux logs deployment/flux | grep identity.pub | cut -d '"' -f2)
-
-  message "adding the key to github automatically"
-  "$REPO_ROOT"/setup/add-repo-key.sh "$FLUX_KEY"
+  FLUX_INSTALLED=$?
+  if [ $FLUX_INSTALLED != 0 ]; then 
+    echo -e "flux did not install correctly, aborting!"
+    exit 1
+  fi
 }
 
+"$REPO_ROOT"/setup/bootstrap-objects.sh
 installFlux
+"$REPO_ROOT"/setup/bootstrap-vault.sh
 
 message "all done!"
 kubectl get nodes -o=wide
