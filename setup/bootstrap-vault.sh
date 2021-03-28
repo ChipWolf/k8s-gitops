@@ -4,7 +4,7 @@
 # trap "kill 0" EXIT
 
 export REPO_ROOT=$(git rev-parse --show-toplevel)
-export REPLIACS="0 1"
+export REPLIACS="0"
 
 need() {
     if ! command -v "$1" &> /dev/null
