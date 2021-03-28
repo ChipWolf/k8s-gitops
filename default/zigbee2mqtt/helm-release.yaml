@@ -26,9 +26,24 @@ spec:
                   operator: In
                   values:
                     - ubuntu
+    env:
+      TZ: "Europe/London"
+    securityContext:
+      privileged: true
     config:
+      homeassistant: true
+      device_options:
+        retain: true
+      permit_join: true
+      mqtt:
+        base_topic: zigbee2mqtt
+        server: "mqtt://vernemq"
+      serial:
+        port: /dev/ttyUSB0
       advanced:
         log_level: debug
+        log_output:
+          - console
         network_key:
           - 146
           - 236
@@ -46,6 +61,10 @@ spec:
           - 48
           - 172
           - 254
+      frontend:
+        port: 8080
+      experimental:
+        new_api: true
       devices:
         "0x00158d000533c498":
           friendly_name: Nursery Environment
@@ -92,9 +111,6 @@ spec:
         "0xec1bbdfffe432007":
           friendly_name: Kitchen Rail Near Inner
           retain: true
-      homeassistant: true
-      mqtt:
-        server: "mqtt://vernemq"
     ingress:
       annotations:
         kubernetes.io/ingress.class: nginx
@@ -115,7 +131,13 @@ spec:
         size: 100Mi
         skipuninstall: true
         storageClass: openebs-hostpath
-    timezone: Europe/London
+    additionalVolumeMounts:
+      - name: usb
+        mountPath: /dev/ttyUSB0
+    additionalVolumes:
+      - name: usb
+        hostPath:
+          path: /dev/ttyACM0
     tolerations:
       - key: arm
         operator: Exists
