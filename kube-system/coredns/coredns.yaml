@@ -20,7 +20,7 @@ spec:
     tolerations:
       - key: "arm"
         operator: "Exists"
-    replicaCount: 2
+    replicaCount: 1
     serviceType: LoadBalancer
     #prometheus:
     #  service:
