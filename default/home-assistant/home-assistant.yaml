@@ -100,7 +100,3 @@ spec:
       persistence:
         enabled: true
         storageClass: "openebs-hostpath"
-  valuesFrom:
-    - kind: Secret
-      name: "home-assistant-helm-values"
-      optional: false
