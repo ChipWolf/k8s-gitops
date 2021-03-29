@@ -16,7 +16,7 @@ write_files:
   - content: |-
       [service_wolf]
       Type = ethernet
-      IPv4 = 172.16.1.90/255.255.255.0/172.16.1.1
+      IPv4 = 172.16.1.233/255.255.255.0/172.16.1.1
       Nameservers = 172.16.1.23
     encoding: ""
     owner: root

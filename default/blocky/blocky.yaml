@@ -51,7 +51,7 @@ spec:
           172.16.1.0/24:
             - ads
       clientLookup:
-        upstream: tcp+udp:172.16.1.90
+        upstream: tcp+udp:172.16.1.233
       prometheus:
         enable: true
         path: /metrics

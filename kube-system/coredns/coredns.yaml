@@ -68,6 +68,6 @@ spec:
       - contents: |
           starbs.net.   IN SOA ns-235.awsdns-29.com. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400
           *.starbs.net. IN A   172.16.1.119
-          starbs.net. IN A   172.16.1.90
+          starbs.net. IN A   172.16.1.233
         domain: starbs.net
         filename: starbs.net
