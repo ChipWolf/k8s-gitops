@@ -173,14 +173,13 @@ loadSecretsToVault() {
   ####################
   # helm chart values
   ####################
+  kvault "kube-system/external-dns/external-dns-helm-values.txt"
   kvault "kube-system/kured/kured-helm-values.txt"
-  kvault "default/home-assistant/home-assistant-helm-values.txt"
 }
 
 loadSecretsToVault-oneoff() {
   message "writing secrets to vault"
-  kvault "monitoring/grafana/grafana-helm-values.txt"
-
+  # kvault "monitoring/grafana/grafana-helm-values.txt"
 }
 
 FIRST_RUN=1
