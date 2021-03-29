@@ -54,6 +54,7 @@ spec:
         enabled: true
         storageClass: "openebs-hostpath"
         accessMode: ReadWriteOnce
+        skipuninstall: true
         size: "10Gi"
     addons:
       codeserver:
@@ -100,3 +101,4 @@ spec:
       persistence:
         enabled: true
         storageClass: "openebs-hostpath"
+        skipuninstall: true

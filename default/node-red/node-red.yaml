@@ -43,6 +43,7 @@ spec:
         mountPath: /data
         storageClass: "openebs-hostpath"
         accessMode: ReadWriteOnce
+        skipuninstall: true
         size: "5Gi"
     tolerations:
       - key: "arm"
